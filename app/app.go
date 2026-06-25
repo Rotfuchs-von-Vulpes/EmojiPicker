@@ -3,6 +3,8 @@ package app
 import (
 	emojiManager "EmojiPicker/app/emoji"
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/AllenDang/cimgui-go/backend"
 	im "github.com/AllenDang/cimgui-go/imgui"
@@ -18,6 +20,23 @@ type emojiData struct {
 
 var emojis []emojiData
 
+func addEmoji(e emojiManager.Emoji) {
+	var emoji emojiData
+	emoji.name = e.Name
+	emoji.keywords = e.Keywords
+	emoji.url = e.Url
+	emoji.texture = backend.NewTextureFromRgba(e.Img)
+	emojis = append(emojis, emoji)
+}
+
+func sortEmojis() {
+	less := func(a, b emojiData) int {
+		return strings.Compare(a.name, b.name)
+	}
+
+	slices.SortFunc(emojis, less)
+}
+
 func Initialize() {
 	clipboard.Init()
 	emojiManager.Init()
@@ -26,13 +45,9 @@ func Initialize() {
 func AfterCreateContext() {
 	es := emojiManager.GetAllEMojis()
 	for _, e := range es {
-		var emoji emojiData
-		emoji.name = e.Name
-		emoji.keywords = e.Keywords
-		emoji.url = e.Url
-		emoji.texture = backend.NewTextureFromRgba(e.Img)
-		emojis = append(emojis, emoji)
+		addEmoji(e)
 	}
+	sortEmojis()
 }
 
 func BeforeDestroyContext() {
@@ -68,12 +83,8 @@ func ShowPictureLoadingDemo() {
 				imageLinkInput = ""
 				emojiNameInput = ""
 
-				var emoji emojiData
-				emoji.name = e.Name
-				emoji.keywords = e.Keywords
-				emoji.url = e.Url
-				emoji.texture = backend.NewTextureFromRgba(e.Img)
-				emojis = append(emojis, emoji)
+				addEmoji(e)
+				sortEmojis()
 
 				im.CloseCurrentPopup()
 			}
