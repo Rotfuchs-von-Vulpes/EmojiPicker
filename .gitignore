@@ -1,3 +1,4 @@
 imgui.ini
 UserData/*
 *.exe
+*.syso
