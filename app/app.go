@@ -98,12 +98,16 @@ func ShowPictureLoadingDemo() {
 		im.EndPopup()
 	}
 
-	for _, emoji := range emojis {
+	const width = 64
+	for i, emoji := range emojis {
+		availableSpace := im.ContentRegionAvail().X
 		if im.ImageButton(emoji.name, emoji.texture.ID, im.NewVec2(48, 48)) {
 			str := "[" + emoji.name + "](" + emoji.url + "?size=48&animated=true&lossless=true" + ")"
 			clipboard.Write(clipboard.FmtText, []byte(str))
 		}
-		im.SameLine()
+		if i != len(emojis)-1 && availableSpace-2*width > 0 {
+			im.SameLine()
+		}
 	}
 
 	im.End()
