@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"runtime"
 
 	"EmojiPicker/app"
@@ -26,15 +25,9 @@ func main() {
 
 	currentBackend.SetBgColor(imgui.NewVec4(0.45, 0.55, 0.6, 1.0))
 
-	currentBackend.CreateWindow("Hello from cimgui-go", 1200, 900)
+	currentBackend.CreateWindow("Fake Emoji Picker", 1200, 900)
 
-	currentBackend.SetDropCallback(func(p []string) {
-		fmt.Printf("drop triggered: %v", p)
-	})
-
-	currentBackend.SetCloseCallback(func() {
-		fmt.Println("window is closing")
-	})
+	currentBackend.SetSwapInterval(sdlbackend.SDLSwapIntervalVsync)
 
 	currentBackend.Run(app.Loop)
 }
