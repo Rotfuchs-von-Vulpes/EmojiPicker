@@ -60,14 +60,14 @@ func Loop() {
 	dockID = im.IDStr("My Dockspace")
 	im.DockSpaceOverViewportV(dockID, im.MainViewport(), im.DockNodeFlagsNone, im.NewEmptyWindowClass())
 
-	ShowPictureLoadingDemo()
+	ShowEmojis()
 }
 
 var imageLinkInput string
 var emojiNameInput string
 
-func ShowPictureLoadingDemo() {
-	im.Begin("Image")
+func ShowEmojis() {
+	im.Begin("Emojis")
 
 	if im.Button("Add Emoji") {
 		im.OpenPopupStr("Add Emoji")
