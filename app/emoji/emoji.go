@@ -68,6 +68,13 @@ func getFileName(url string) (name string) {
 
 func SaveEmoji(url, name string) (e Emoji, finalerr error) {
 	url = strings.Split(url, "?")[0]
+	dirs := strings.Split(url, "/")
+	fmt.Println(url)
+	fmt.Println(dirs)
+	if len(dirs) < 2 || dirs[2] != "cdn.discordapp.com" {
+		finalerr = fmt.Errorf("%s não é uma URL para o discord", url)
+		return
+	}
 	data, err := downloadFile(url)
 	if err != nil {
 		finalerr = err
