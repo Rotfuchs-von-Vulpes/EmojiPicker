@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/AllenDang/cimgui-go/backend"
 	im "github.com/AllenDang/cimgui-go/imgui"
@@ -37,6 +38,9 @@ func sortEmojis() {
 	slices.SortFunc(emojis, less)
 }
 
+const FPS = 60
+const minimumRate int64 = 1000 / FPS
+
 func Initialize() {
 	clipboard.Init()
 	emojiManager.Init()
@@ -57,10 +61,17 @@ func BeforeDestroyContext() {
 var dockID im.ID
 
 func Loop() {
+	now := time.Now()
+
 	dockID = im.IDStr("My Dockspace")
 	im.DockSpaceOverViewportV(dockID, im.MainViewport(), im.DockNodeFlagsNone, im.NewEmptyWindowClass())
 
 	ShowEmojis()
+
+	elapsed := time.Since(now).Milliseconds()
+	if elapsed < minimumRate {
+		time.Sleep(time.Duration(minimumRate-elapsed) * time.Millisecond)
+	}
 }
 
 var imageLinkInput string

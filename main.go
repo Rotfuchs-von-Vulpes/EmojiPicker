@@ -27,7 +27,5 @@ func main() {
 
 	currentBackend.CreateWindow("Fake Emoji Picker", 1200, 900)
 
-	currentBackend.SetSwapInterval(sdlbackend.SDLSwapIntervalVsync)
-
 	currentBackend.Run(app.Loop)
 }
