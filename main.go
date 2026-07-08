@@ -19,7 +19,7 @@ func init() {
 func main() {
 	app.Initialize()
 
-	currentBackend, _ = backend.CreateBackend(sdlbackend.NewSDLBackend())
+	currentBackend, _ = backend.CreateBackend(sdlbackend.NewSDLSoftwareBackend())
 	currentBackend.SetAfterCreateContextHook(app.AfterCreateContext)
 	currentBackend.SetBeforeDestroyContextHook(app.BeforeDestroyContext)
 

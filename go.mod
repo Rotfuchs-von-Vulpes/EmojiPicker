@@ -15,3 +15,5 @@ require (
 	golang.org/x/mobile v0.0.0-20250606033058-a2a15c67f36f // indirect
 	golang.org/x/sys v0.36.0 // indirect
 )
+
+replace github.com/AllenDang/cimgui-go => github.com/Rotfuchs-von-Vulpes/cimgui-go v1.5.0
