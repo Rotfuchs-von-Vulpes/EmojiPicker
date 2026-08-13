@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,15 +17,20 @@ func getEmojiID(filename string) (id string) {
 	return
 }
 
+var AppDir string
+
 func Init() {
-	if err := os.MkdirAll("UserData/Data", os.ModePerm); err != nil {
+	dir, err := os.UserConfigDir()
+	if err != nil {
 		panic(err)
 	}
-	if err := os.MkdirAll("UserData/Images", os.ModePerm); err != nil {
+	AppDir = filepath.Join(dir, "EmojiPicker")
+
+	if err := os.MkdirAll(filepath.Join(AppDir, "Images"), os.ModePerm); err != nil {
 		panic(err)
 	}
 
-	if f, err := os.Open("UserData/Data/emojisMetaData.csv"); err != nil && !errors.Is(err, os.ErrNotExist) {
+	if f, err := os.Open(filepath.Join(AppDir, "emojisMetaData.csv")); err != nil && !errors.Is(err, os.ErrNotExist) {
 		panic(err)
 	} else if err == nil {
 		r := csv.NewReader(f)
@@ -53,7 +59,7 @@ func StoreEmoji(fileName, name, link string, data []byte) {
 	emojiMetaData = append(emojiMetaData, link)
 	EmojisMetaData = append(EmojisMetaData, emojiMetaData)
 
-	if f, err := os.Create("UserData/Data/emojisMetaData.csv"); err != nil {
+	if f, err := os.Create(filepath.Join(AppDir, "emojisMetaData.csv")); err != nil {
 		panic(err)
 	} else {
 		w := csv.NewWriter(f)
@@ -63,7 +69,7 @@ func StoreEmoji(fileName, name, link string, data []byte) {
 		f.Close()
 	}
 
-	if f, err := os.Create("UserData/Images" + "/" + fileName); err != nil {
+	if f, err := os.Create(filepath.Join(AppDir, "Images", fileName)); err != nil {
 		panic(err)
 	} else {
 		f.Write(data)
@@ -81,11 +87,11 @@ type EmojiData struct {
 var AllEmojisData []EmojiData
 
 func readAllEmojis() {
-	path := "UserData/Images/"
+	path := filepath.Join(AppDir, "Images")
 	if files, err := os.ReadDir(path); err == nil {
 		for _, file := range files {
 			if !file.IsDir() {
-				if f, err := os.ReadFile(path + file.Name()); err != nil {
+				if f, err := os.ReadFile(filepath.Join(path, file.Name())); err != nil {
 					fmt.Println(err)
 				} else {
 					id := getEmojiID(file.Name())
