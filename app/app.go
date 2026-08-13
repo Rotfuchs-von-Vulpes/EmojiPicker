@@ -2,7 +2,9 @@ package app
 
 import (
 	emojiManager "EmojiPicker/app/emoji"
+	"EmojiPicker/app/emoji/resources"
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -52,6 +54,7 @@ func AfterCreateContext() {
 		addEmoji(e)
 	}
 	sortEmojis()
+	im.CurrentIO().SetIniFilename(filepath.Join(resources.AppDir, "imgui.ini"))
 }
 
 func BeforeDestroyContext() {
