@@ -44,8 +44,7 @@ var AllEmojis []Emoji
 
 func Init() {
 	resources.Init()
-	es := resources.AllEmojisData
-	for _, e := range es {
+	for _, e := range resources.AllEmojisData {
 		imgImage, _, err := image.Decode(bytes.NewReader(e.Data))
 		if err != nil {
 			fmt.Println(err)
@@ -69,8 +68,6 @@ func getFileName(url string) (name string) {
 func SaveEmoji(url, name string) (e Emoji, finalerr error) {
 	url = strings.Split(url, "?")[0]
 	dirs := strings.Split(url, "/")
-	fmt.Println(url)
-	fmt.Println(dirs)
 	if len(dirs) < 2 || dirs[2] != "cdn.discordapp.com" {
 		finalerr = fmt.Errorf("%s não é uma URL para o discord", url)
 		return
