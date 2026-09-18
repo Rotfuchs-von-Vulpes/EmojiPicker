@@ -1,6 +1,6 @@
 module EmojiPicker
 
-go 1.25.6
+go 1.27.1
 
 require (
 	github.com/AllenDang/cimgui-go v1.5.0
