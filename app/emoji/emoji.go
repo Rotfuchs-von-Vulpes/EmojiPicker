@@ -133,7 +133,7 @@ func getFileName(url string) (name string) {
 func SaveEmoji(url, name string) (e Emoji, finalerr error) {
 	pair := strings.Split(url, "?")
 	baseUrl := pair[0]
-	var downloadUrl string
+	downloadUrl := url
 	animated := false
 	if len(pair) > 1 {
 		args := strings.SplitSeq(pair[1], "&")
@@ -160,7 +160,7 @@ func SaveEmoji(url, name string) (e Emoji, finalerr error) {
 		finalerr = err
 		return
 	}
-	fileName := getFileName(baseUrl)
+	fileName := getFileName(downloadUrl)
 	resources.StoreEmoji(fileName, name, baseUrl, animated, data)
 
 	if animated {

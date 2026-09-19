@@ -34,13 +34,16 @@ func (s *emojiData) loop() {
 	now := time.Now().UnixMilli()
 	elapsed := now - s.last
 	s.deltaTime += elapsed
-	if s.idx >= s.loopCount-1 {
-		s.idx = 0
-	}
 	delay := 10 * int64(s.delay[s.idx])
+	if delay == 0 {
+		delay = 100
+	}
 	if s.deltaTime > delay {
-		s.deltaTime = s.deltaTime % delay
+		s.deltaTime = 0
 		s.idx++
+		if s.idx > s.loopCount-1 {
+			s.idx = 0
+		}
 	}
 	s.last = now
 }
@@ -100,13 +103,16 @@ func (s *gifData) loop() {
 	now := time.Now().UnixMilli()
 	elapsed := now - s.last
 	s.deltaTime += elapsed
-	if s.idx >= s.loopCount-1 {
-		s.idx = 0
-	}
 	delay := 10 * int64(s.delay[s.idx])
+	if delay == 0 {
+		delay = 100
+	}
 	if s.deltaTime > delay {
-		s.deltaTime -= delay
+		s.deltaTime = 0
 		s.idx++
+		if s.idx > s.loopCount-1 {
+			s.idx = 0
+		}
 	}
 	s.last = now
 }
