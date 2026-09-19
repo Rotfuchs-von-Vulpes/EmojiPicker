@@ -20,21 +20,62 @@ type emojiData struct {
 	url      string
 	keywords []string
 	texture  *backend.Texture
+
+	animated  bool
+	loopCount int
+	delay     []int
+
+	deltaTime int64
+	last      int64
+	idx       int
 }
 
-var emojis []emojiData
+func (s *emojiData) loop() {
+	now := time.Now().UnixMilli()
+	elapsed := now - s.last
+	s.deltaTime += elapsed
+	if s.idx >= s.loopCount-1 {
+		s.idx = 0
+	}
+	delay := 10 * int64(s.delay[s.idx])
+	if s.deltaTime > delay {
+		s.deltaTime = s.deltaTime % delay
+		s.idx++
+	}
+	s.last = now
+}
+
+func (s *emojiData) uv0() (v im.Vec2) {
+	v.X = float32(s.idx) / float32(s.loopCount)
+	v.Y = 0
+	return
+}
+
+func (s *emojiData) uv1() (v im.Vec2) {
+	v.X = float32(s.idx+1) / float32(s.loopCount)
+	v.Y = 1
+	return
+}
+
+var emojis []*emojiData
 
 func addEmoji(e emojiManager.Emoji) {
-	var emoji emojiData
+	emoji := new(emojiData)
 	emoji.name = e.Name
 	emoji.keywords = e.Keywords
 	emoji.url = e.Url
 	emoji.texture = backend.NewTextureFromRgba(e.Img)
+
+	emoji.animated = e.Animated
+	emoji.delay = e.Delay
+	emoji.loopCount = e.LoopCount
+	emoji.last = time.Now().UnixMilli()
+
 	emojis = append(emojis, emoji)
 }
 
 func sortEmojis() {
-	less := func(a, b emojiData) int {
+	less := func(a, b *emojiData) int {
 		return strings.Compare(a.name, b.name)
 	}
 
@@ -100,11 +141,11 @@ func addGif(g gifManager.Gif) {
 }
 
 func sortGifs() {
-	less := func(a, b emojiData) int {
-		return strings.Compare(a.name, b.name)
+	less := func(a, b *gifData) int {
+		return strings.Compare(a.id, b.id)
 	}
 
-	slices.SortFunc(emojis, less)
+	slices.SortFunc(gifs, less)
 }
 
 const FPS = 60
@@ -121,9 +162,10 @@ func AfterCreateContext() {
 		addEmoji(e)
 	}
 	sortEmojis()
-	for _, g := range gifManager.GetAllGifs() {
-		addGif(g)
-	}
+	// for _, g := range gifManager.GetAllGifs() {
+	// 	addGif(g)
+	// }
+	// sortGifs()
 	im.CurrentIO().SetIniFilename(filepath.Join(resources.AppDir, "imgui.ini"))
 }
 
@@ -140,7 +182,7 @@ func Loop() {
 	im.DockSpaceOverViewportV(dockID, im.MainViewport(), im.DockNodeFlagsNone, im.NewEmptyWindowClass())
 
 	ShowEmojis()
-	ShowGifs()
+	// ShowGifs()
 
 	elapsed := time.Since(now).Milliseconds()
 	if elapsed < minimumRate {
@@ -186,9 +228,17 @@ func ShowEmojis() {
 	const width = 64
 	for i, emoji := range emojis {
 		availableSpace := im.ContentRegionAvail().X
-		if im.ImageButton(emoji.name, emoji.texture.ID, im.NewVec2(48, 48)) {
-			str := "[" + emoji.name + "](" + emoji.url + "?size=48&animated=true&lossless=true" + ")"
-			clipboard.Write(clipboard.FmtText, []byte(str))
+		if emoji.animated {
+			emoji.loop()
+			if im.ImageButtonV(emoji.name, emoji.texture.ID, im.NewVec2(48, 48), emoji.uv0(), emoji.uv1(), im.NewVec4(0, 0, 0, 0), im.NewVec4(1, 1, 1, 1)) {
+				str := "[" + emoji.name + "](" + emoji.url + "?size=48&animated=true&lossless=true" + ")"
+				clipboard.Write(clipboard.FmtText, []byte(str))
+			}
+		} else {
+			if im.ImageButton(emoji.name, emoji.texture.ID, im.NewVec2(48, 48)) {
+				str := "[" + emoji.name + "](" + emoji.url + "?size=48&animated=true&lossless=true" + ")"
+				clipboard.Write(clipboard.FmtText, []byte(str))
+			}
 		}
 		if i != len(emojis)-1 && availableSpace-2*width > 0 {
 			im.SameLine()
@@ -236,12 +286,6 @@ func ShowGifs() {
 		if im.ImageButtonV(gif.id, gif.texture.ID, im.NewVec2(48, 48), gif.uv0(), gif.uv1(), im.NewVec4(0, 0, 0, 0), im.NewVec4(1, 1, 1, 1)) {
 			str := gif.url
 			clipboard.Write(clipboard.FmtText, []byte(str))
-		}
-		if im.IsItemHovered() {
-			if im.BeginTooltip() {
-				im.Text("poposa")
-			}
-			im.EndTooltip()
 		}
 		if i != len(gifs)-1 && availableSpace-2*width > 0 {
 			im.SameLine()

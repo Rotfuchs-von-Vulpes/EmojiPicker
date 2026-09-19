@@ -50,20 +50,25 @@ func Init() {
 	readAllEmojis()
 }
 
-func StoreEmoji(fileName, name, link string, data []byte) {
+func StoreEmoji(fileName, name, link string, animated bool, data []byte) {
 	id := getEmojiID(fileName)
 
 	emojiMetaData := []string{}
 	emojiMetaData = append(emojiMetaData, id)
 	emojiMetaData = append(emojiMetaData, name)
 	emojiMetaData = append(emojiMetaData, link)
+	if animated {
+		emojiMetaData = append(emojiMetaData, "true")
+	} else {
+		emojiMetaData = append(emojiMetaData, "false")
+	}
 	EmojisMetaData = append(EmojisMetaData, emojiMetaData)
 
 	if f, err := os.Create(filepath.Join(AppDir, "emojisMetaData.csv")); err != nil {
 		panic(err)
 	} else {
 		w := csv.NewWriter(f)
-		w.Write([]string{"id", "name", "url"})
+		w.Write([]string{"id", "name", "url", "animated"})
 		w.WriteAll(EmojisMetaData)
 		w.Flush()
 		f.Close()
@@ -78,10 +83,11 @@ func StoreEmoji(fileName, name, link string, data []byte) {
 }
 
 type EmojiData struct {
-	Id   string
-	Name string
-	Url  string
-	Data []byte
+	Id       string
+	Name     string
+	Url      string
+	Animated bool
+	Data     []byte
 }
 
 var AllEmojisData []EmojiData
@@ -97,17 +103,21 @@ func readAllEmojis() {
 					id := getEmojiID(file.Name())
 					name := ""
 					url := ""
+					animated := false
+					found := false
 					for _, line := range EmojisMetaData {
 						if line[0] == id {
+							found = true
 							name = line[1]
 							url = line[2]
+							animated = line[3] == "true"
 							break
 						}
 					}
-					if name == "" {
+					if !found {
 						continue
 					}
-					AllEmojisData = append(AllEmojisData, EmojiData{id, name, url, f})
+					AllEmojisData = append(AllEmojisData, EmojiData{id, name, url, animated, f})
 				}
 			}
 		}
